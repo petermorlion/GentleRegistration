@@ -209,10 +209,10 @@ function registration_menu() {
       );
       $items[$type . '/%entity_object/registrations'] = array(
         'load arguments' => array($type),
-        'title' => 'Manage Registrations',
+        'title' => 'Registrations',
         'page callback' => 'registration_registrations_page',
         'page arguments' => array(0, 1),
-        'access callback' => 'registration_administer_registrations_access',
+        'access callback' => 'registration_registrations_access',
         'access arguments' => array(0, 1),
         'type' => MENU_LOCAL_TASK,
       );
@@ -221,7 +221,7 @@ function registration_menu() {
         'title' => 'Registrations',
         'page callback' => 'registration_registrations_page',
         'page arguments' => array(0, 1),
-        'access callback' => 'registration_administer_registrations_access',
+        'access callback' => 'registration_registrations_access',
         'access arguments' => array(0, 1),
         'type' => MENU_DEFAULT_LOCAL_TASK,
       );
@@ -434,7 +434,33 @@ function registration_page_title(Registration $registration) {
 }
 
 /**
- * Access callback: for registration_register_page().
+ * Access callback: for registration_registrations_page().
+ *
+ * Check if user has access the registrations for a host entity.
+ *
+ * @param string $entity_type
+ *   The host entity type.
+ * @param object $entity
+ *   The host entity.
+ *
+ * @return bool
+ *   Whether a user can view the registrations for a host entity.
+ *
+ * @see registration_register_page()
+ * @see registration_menu()
+ */
+function registration_registrations_access($entity_type, $entity) {
+  $registration_type = registration_get_entity_registration_type($entity_type, $entity);
+  if ($registration_type) {
+    if (user_access("administer own $registration_type registration")) {
+      return TRUE;
+    }
+  }
+  return FALSE;
+}
+
+/**
+ * Access callback: for registration_registrations_page().
  *
  * Check if user has access to register for a host entity.
  *
@@ -451,7 +477,6 @@ function registration_page_title(Registration $registration) {
  */
 function registration_register_page_access($entity_type, $entity) {
   list($entity_id) = entity_extract_ids($entity_type, $entity);
-
   if ($type = registration_get_entity_registration_type($entity_type, $entity)) {
     $registration = entity_get_controller('registration')->create(array(
       'entity_type' => $entity_type,
@@ -470,7 +495,7 @@ function registration_register_page_access($entity_type, $entity) {
 }
 
 /**
- * Access callback: for registration_registrations_page().
+ * Access callback: for registration_entity_settings_page().
  *
  * Check if user has access to administer registrations for a host entity.
  *
@@ -491,7 +516,7 @@ function registration_administer_registrations_access($entity_type, $entity) {
     if (user_access("administer $registration_type registration")) {
       return TRUE;
     }
-    elseif (user_access("administer own $registration_type registration") && entity_access('update', $entity_type, $entity)) {
+    elseif (entity_access('update', $entity_type, $entity)) {
       return TRUE;
     }
   }
