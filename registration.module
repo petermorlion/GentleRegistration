@@ -273,6 +273,21 @@ function registration_menu() {
 }
 
 /**
+ * Implements hook_menu_alter().
+ */
+function registration_menu_alter(&$item) {
+  foreach (registration_get_registration_instances() as $instance) {
+    $type = $instance['entity_type'];
+    $display = $instance['display']['default']['type'];
+    if (!in_array($type, array('registration', 'registration_type'))) {
+      if ($display == 'registration_form') {
+        $item[$type . '/%entity_object/register']['type'] = MENU_CALLBACK;
+      }
+    }
+  }
+}
+
+/**
  * Implements hook_permission().
  */
 function registration_permission() {
