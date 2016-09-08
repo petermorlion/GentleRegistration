@@ -1,5 +1,7 @@
 Entity based registration system for Drupal.
 
+No longer maintained.
+
 # Configuration
 1. Download and enable the module.
 2. Create at least one registration bundle (or type) at
